@@ -10,25 +10,14 @@ defmodule BerlinClockConverter do
   end
 
   defp seconds_lamp(seconds) do
-    if even?(seconds) do
-      :yellow
-    else
-      :off
-    end
+    if even?(seconds), do: :yellow, else: :off
   end
 
   defp even?(number), do: rem(number, 2) == 0
 
   defp single_minutes_lamps(minutes) do
     lamps = [:first, :second, :third, :fourth]
-    lamps_to_turn_on = rem(minutes, 5)
-
-    lamps
-    |> Enum.with_index()
-    |> Enum.map(fn
-      {lamp, index} when index < lamps_to_turn_on -> {lamp, :yellow}
-      {lamp, _index} -> {lamp, :off}
-    end)
+    turn_on_lamps(lamps, rem(minutes, 5), :yellow)
   end
 
   defp five_minutes_lamps(minutes) do
@@ -46,12 +35,26 @@ defmodule BerlinClockConverter do
       :eleventh
     ]
 
-    lamps_to_turn_on = div(minutes, 5)
+    turn_on_lamps(lamps, div(minutes, 5), :yellow, :red, &is_five_minutes_red_lamp/1)
+  end
+
+  defp turn_on_lamps(
+         lamps,
+         lamps_to_turn_on,
+         default_color_lamp,
+         alternate_color_lamp \\ nil,
+         alternate_color_predicate \\ fn _ -> false end
+       ) do
     lamps
     |> Enum.with_index()
     |> Enum.map(fn
-      {lamp, index} when index < lamps_to_turn_on -> if is_five_minutes_red_lamp(index), do: {lamp, :red}, else: {lamp, :yellow}
-      {lamp, _index} -> {lamp, :off}
+      {lamp, index} when index < lamps_to_turn_on ->
+        if alternate_color_predicate.(index),
+          do: {lamp, alternate_color_lamp},
+          else: {lamp, default_color_lamp}
+
+      {lamp, _index} ->
+        {lamp, :off}
     end)
   end
 
