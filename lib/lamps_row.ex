@@ -15,15 +15,15 @@ defmodule LampsRow do
 
   defstruct lamps: []
 
-  def create(lamps_count, red_lamp_predicate \\ fn _ -> false end) do
+  def create(lamps_count, alternate_color_predicate \\ fn _ -> false end, default_color \\ :yellow, alternate_color \\ :red) do
     lamps =
       @available_lamps
       |> Enum.with_index()
       |> Enum.map(fn {lamp_ordinal_seq, index} ->
         lamp =
-          if red_lamp_predicate.(index),
-            do: Lamp.create_red_lamp(),
-            else: Lamp.create_yellow_lamp()
+          if alternate_color_predicate.(index),
+            do: Lamp.create_lamp(alternate_color),
+            else: Lamp.create_lamp(default_color)
 
         {lamp_ordinal_seq, lamp}
       end)

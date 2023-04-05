@@ -198,4 +198,84 @@ defmodule BerlinClockConverterTest do
              } = result
     end
   end
+
+  describe "converts hours with single hours lamps" do
+    test "returning first lamp on when hours figures ends with 1" do
+      result = BerlinClockConverter.convert(~T"01:00:00")
+
+      assert %BerlinClock{
+               single_hours: [first: :red, second: :off, third: :off, fourth: :off]
+             } = result
+    end
+
+    test "returning first lamp on when hours figures ends with 6" do
+      result = BerlinClockConverter.convert(~T"06:00:00")
+
+      assert %BerlinClock{
+               single_hours: [first: :red, second: :off, third: :off, fourth: :off]
+             } = result
+    end
+
+    test "returning all lamps off when hours figures ends with 0" do
+      result = BerlinClockConverter.convert(~T"00:00:00")
+
+      assert %BerlinClock{single_hours: [first: :off, second: :off, third: :off, fourth: :off]} =
+               result
+    end
+
+    test "returning all lamps off when hours figures ends with 5" do
+      result = BerlinClockConverter.convert(~T"05:00:00")
+
+      assert %BerlinClock{single_hours: [first: :off, second: :off, third: :off, fourth: :off]} =
+               result
+    end
+
+    test "returning first two lamps on when hours figures ends with 2" do
+      result = BerlinClockConverter.convert(~T"02:00:00")
+
+      assert %BerlinClock{
+               single_hours: [first: :red, second: :red, third: :off, fourth: :off]
+             } = result
+    end
+
+    test "returning first two lamps when hours figures ends with 7" do
+      result = BerlinClockConverter.convert(~T"07:00:00")
+
+      assert %BerlinClock{
+               single_hours: [first: :red, second: :red, third: :off, fourth: :off]
+             } = result
+    end
+
+    test "returning first three lamps on when hours figures ends with 3" do
+      result = BerlinClockConverter.convert(~T"03:00:00")
+
+      assert %BerlinClock{
+               single_hours: [first: :red, second: :red, third: :red, fourth: :off]
+             } = result
+    end
+
+    test "returning first three lamps on when hours figures ends with 8" do
+      result = BerlinClockConverter.convert(~T"08:08:00")
+
+      assert %BerlinClock{
+               single_hours: [first: :red, second: :red, third: :red, fourth: :off]
+             } = result
+    end
+
+    test "returning all lamps on when hours figures ends with 4" do
+      result = BerlinClockConverter.convert(~T"04:00:00")
+
+      assert %BerlinClock{
+               single_hours: [first: :red, second: :red, third: :red, fourth: :red]
+             } = result
+    end
+
+    test "returning all lamps on when hours figures ends with 9" do
+      result = BerlinClockConverter.convert(~T"09:00:00")
+
+      assert %BerlinClock{
+               single_hours: [first: :red, second: :red, third: :red, fourth: :red]
+             } = result
+    end
+  end
 end
