@@ -1,5 +1,6 @@
 defmodule BerlinClock do
   defstruct seconds: :off,
+            five_hours: [first: :yellow, second: :off, third: :off, fourth: :off],
             single_hours: [first: :off, second: :off, third: :off, fourth: :off],
             five_minutes: [
               first: :yellow,

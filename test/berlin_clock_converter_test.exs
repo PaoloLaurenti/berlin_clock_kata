@@ -113,7 +113,7 @@ defmodule BerlinClockConverterTest do
                  eighth: :off,
                  ninth: :off,
                  tenth: :off,
-                 eleventh: :off,
+                 eleventh: :off
                ]
              } = result
     end
@@ -133,7 +133,7 @@ defmodule BerlinClockConverterTest do
                  eighth: :off,
                  ninth: :off,
                  tenth: :off,
-                 eleventh: :off,
+                 eleventh: :off
                ]
              } = result
     end
@@ -153,7 +153,7 @@ defmodule BerlinClockConverterTest do
                  eighth: :off,
                  ninth: :off,
                  tenth: :off,
-                 eleventh: :off,
+                 eleventh: :off
                ]
              } = result
     end
@@ -173,7 +173,7 @@ defmodule BerlinClockConverterTest do
                  eighth: :yellow,
                  ninth: :red,
                  tenth: :yellow,
-                 eleventh: :yellow,
+                 eleventh: :yellow
                ]
              } = result
     end
@@ -193,7 +193,7 @@ defmodule BerlinClockConverterTest do
                  eighth: :yellow,
                  ninth: :red,
                  tenth: :yellow,
-                 eleventh: :yellow,
+                 eleventh: :yellow
                ]
              } = result
     end
@@ -276,6 +276,36 @@ defmodule BerlinClockConverterTest do
       assert %BerlinClock{
                single_hours: [first: :red, second: :red, third: :red, fourth: :red]
              } = result
+    end
+  end
+
+  describe "converts hours with five hours lamps" do
+    test "returning first red lamp on when hours are >= 5" do
+      result = BerlinClockConverter.convert(~T"05:00:00")
+
+      assert %BerlinClock{five_hours: [first: :red, second: :off, third: :off, fourth: :off]} =
+               result
+    end
+
+    test "returning first two red lamps on when hours are >= 10" do
+      result = BerlinClockConverter.convert(~T"10:00:00")
+
+      assert %BerlinClock{five_hours: [first: :red, second: :red, third: :off, fourth: :off]} =
+               result
+    end
+
+    test "returning first three red lamps on when hours are >= 15" do
+      result = BerlinClockConverter.convert(~T"15:00:00")
+
+      assert %BerlinClock{five_hours: [first: :red, second: :red, third: :red, fourth: :off]} =
+        result
+    end
+
+    test "returning all lamps op when hours are >= 20" do
+      result = BerlinClockConverter.convert(~T"20:00:00")
+
+      assert %BerlinClock{five_hours: [first: :red, second: :red, third: :red, fourth: :red]} =
+        result
     end
   end
 end
