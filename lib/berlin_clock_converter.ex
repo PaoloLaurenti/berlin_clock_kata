@@ -16,69 +16,80 @@ defmodule BerlinClockConverter do
   defp even?(number), do: rem(number, 2) == 0
 
   defp single_minutes_lamps(minutes) do
-    lamps = [:first, :second, :third, :fourth]
-    turn_on_lamps(lamps, rem(minutes, 5), :yellow)
+    4
+    |> LampsRow.create()
+    |> LampsRow.turn_on_lamps(rem(minutes, 5))
   end
 
   defp five_minutes_lamps(minutes) do
-    lamps = [
-      :first,
-      :second,
-      :third,
-      :fourth,
-      :fifth,
-      :sixth,
-      :seventh,
-      :eighth,
-      :ninth,
-      :tenth,
-      :eleventh
-    ]
-
-    turn_on_lamps(lamps, div(minutes, 5), :yellow, :red, &is_five_minutes_red_lamp/1)
-  end
-
-  defp turn_on_lamps(
-         lamps,
-         lamps_to_turn_on,
-         default_color_lamp,
-         alternate_color_lamp \\ nil,
-         alternate_color_predicate \\ fn _ -> false end
-       ) do
-    lamps
-    |> Enum.with_index()
-    |> Enum.map(fn
-      {lamp, index} when index < lamps_to_turn_on ->
-        if alternate_color_predicate.(index),
-          do: {lamp, alternate_color_lamp},
-          else: {lamp, default_color_lamp}
-
-      {lamp, _index} ->
-        {lamp, :off}
-    end)
+    11
+    |> LampsRow.create(&is_five_minutes_red_lamp/1)
+    |> LampsRow.turn_on_lamps(div(minutes, 5))
   end
 
   defp is_five_minutes_red_lamp(index) when rem(index + 1, 3) == 0, do: true
   defp is_five_minutes_red_lamp(_index), do: false
+end
 
-  # defp single_minutes_lamps(minutes) when minutes == 1 or minutes == 6,
-  #   do: [first: :yellow, second: :off, third: :off, fourth: :off]
+defmodule LampsRow do
+  @default_color_lamp :yellow
+  @alternate_color_lamp :red
+  @available_lamps [
+    :first,
+    :second,
+    :third,
+    :fourth,
+    :fifth,
+    :sixth,
+    :seventh,
+    :eighth,
+    :ninth,
+    :tenth,
+    :eleventh
+  ]
 
-  # defp single_minutes_lamps(minutes) when minutes == 2 or minutes == 7,
-  #   do: [first: :yellow, second: :yellow, third: :off, fourth: :off]
+  defstruct lamps: []
 
-  # defp single_minutes_lamps(minutes) when minutes == 3 or minutes == 8,
-  #   do: [first: :yellow, second: :yellow, third: :yellow, fourth: :off]
+  def create(lamps_count, red_lamp_predicate \\ fn _ -> false end) do
+    lamps =
+      @available_lamps
+      |> Enum.with_index()
+      |> Enum.map(fn {lamp_ordinal_seq, index} ->
+        lamp =
+          if red_lamp_predicate.(index),
+            do: Lamp.create_red_lamp(),
+            else: Lamp.create_yellow_lamp()
 
-  # defp single_minutes_lamps(minutes) when minutes == 4 or minutes == 9,
-  #   do: [first: :yellow, second: :yellow, third: :yellow, fourth: :yellow]
+        {lamp_ordinal_seq, lamp}
+      end)
+      |> Enum.slice(0..(lamps_count - 1))
 
-  # defp single_minutes_lamps(_minutes) do
-  #   [
-  #     first: :off,
-  #     second: :off,
-  #     third: :off,
-  #     fourth: :off
-  #   ]
-  # end
+    %__MODULE__{lamps: lamps}
+  end
+
+  def turn_on_lamps(%__MODULE__{lamps: lamps}, lamps_to_turn_on) do
+    lamps
+    |> Enum.with_index()
+    |> Enum.map(fn
+      {{lamp_ordinal_seq, lamp}, index} when index < lamps_to_turn_on ->
+        {lamp_ordinal_seq, Lamp.turn_on(lamp)}
+
+      {{lamp_ordinal_seq, lamp}, _index} ->
+        {lamp_ordinal_seq, Lamp.turn_off(lamp)}
+    end)
+    |> Enum.map(fn {lamp_ordinal_seq, lamp} -> {lamp_ordinal_seq, Lamp.get_light(lamp)} end)
+  end
+end
+
+defmodule Lamp do
+  defstruct color: :yellow, status: :off
+
+  def create_yellow_lamp(), do: %__MODULE__{}
+  def create_red_lamp(), do: %__MODULE__{color: :red}
+
+  def turn_on(lamp), do: %__MODULE__{lamp | status: :on}
+  def turn_off(lamp), do: %__MODULE__{lamp | status: :off}
+
+  def get_light(%__MODULE__{status: :off}), do: :off
+  def get_light(%__MODULE__{color: color}), do: color
 end
